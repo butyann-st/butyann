@@ -37,7 +37,7 @@ canvas {
   left: 0;
   z-index: 1;
 }
-/* 解答欄 */
+/* 解答UI */
 ul {
   list-style-type: none;
   padding: 15px;
@@ -96,20 +96,24 @@ canvas.height = window.innerHeight;
 
 let particles = [];
 
-// 花火作成（派手仕様）
+// 花火放射型作成
 function createFirework() {
   for(let j=0;j<3;j++){ // 同時3発
     const x = Math.random()*canvas.width;
     const y = Math.random()*canvas.height/2;
     for(let i=0;i<250;i++){
+      const angle = Math.random()*Math.PI*2; // 0〜360度
+      const speed = Math.random()*15+5;
       particles.push({
         x:x,
         y:y,
-        vx:(Math.random()-0.5)*15,
-        vy:(Math.random()-0.5)*15,
+        vx: Math.cos(angle)*speed,
+        vy: Math.sin(angle)*speed,
         alpha:1,
         color:`hsl(${Math.random()*360},100%,50%)`,
-        size:Math.random()*15+5
+        size:Math.random()*15+5,
+        prevX:x,
+        prevY:y
       });
     }
   }
@@ -119,15 +123,19 @@ function drawFireworks(){
   ctx.clearRect(0,0,canvas.width,canvas.height);
   for(let i=particles.length-1;i>=0;i--){
     let p = particles[i];
-    ctx.fillStyle = p.color;
-    ctx.globalAlpha = p.alpha;
+    ctx.strokeStyle = p.color;
+    ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.arc(p.x,p.y,p.size,0,Math.PI*2);
-    ctx.fill();
-    ctx.globalAlpha = 1;
+    ctx.moveTo(p.prevX, p.prevY);
+    ctx.lineTo(p.x, p.y);
+    ctx.stroke();
+
+    p.prevX = p.x;
+    p.prevY = p.y;
+
     p.x += p.vx;
     p.y += p.vy;
-    p.vy += 0.05;
+    p.vy += 0.05; // 重力
     p.alpha -= 0.015;
     if(p.alpha<=0) particles.splice(i,1);
   }
