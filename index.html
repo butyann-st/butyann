@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>PC部クイズ＆エンドロール</title>
+<style>
+  body {
+    font-family: sans-serif;
+    background-color: #222;
+    color: white;
+    margin: 0;
+    overflow: hidden;
+    text-align: center;
+    transition: background-color 0.3s;
+  }
+  #container { padding-top: 50px; position: relative; z-index: 2;}
+  button {
+    font-size: 1.2em;
+    margin: 10px;
+    padding: 10px 20px;
+  }
+  #status {
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    font-size: 1.2em;
+    z-index: 2;
+  }
+  #endRoll {
+    position: absolute;
+    bottom: -100%;
+    width: 100%;
+    text-align: center;
+    font-size: 2em;
+    color: white;
+    display: none;
+  }
+  canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+  }
+</style>
+</head>
+<body>
+<canvas id="fireworks"></canvas>
+<div id="container">
+  <h1>PC部クイズ！</h1>
+  <button id="startBtn">スタート</button>
+</div>
+<div id="status"></div>
+<div id="endRoll">
+  <p>PC部 第2期 卒業！</p>
+  <p>入部した日々…</p>
+  <p>何か</p>
+  <p>なんか</p>
+  <p>ナンカ</p>
+  <p>nanka</p>
+</div>
+
+<script>
+const canvas = document.getElementById('fireworks');
+const ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+let particles = [];
+
+function createFirework(x, y) {
+  for (let i = 0; i < 30; i++) {
+    particles.push({
+      x: x,
+      y: y,
+      vx: (Math.random()-0.5)*4,
+      vy: (Math.random()-1.5)*4,
+      alpha: 1,
+      color: `hsl(${Math.random()*360}, 100%, 50%)`
+    });
+  }
+}
+
+function drawFireworks() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  for (let i = particles.length-1; i >=0; i--) {
+    let p = particles[i];
+    ctx.fillStyle = `rgba(${p.color}, ${p.alpha})`;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 3, 0, Math.PI*2);
+    ctx.fill();
+    p.x += p.vx;
+    p.y += p.vy;
+    p.alpha -= 0.02;
+    if(p.alpha <= 0) particles.splice(i,1);
+  }
+  requestAnimationFrame(drawFireworks);
+}
+drawFireworks();
+
+const quiz = [
+  {q: "PC部の設立年は？", a: ["2021", "2022", "2023"], correct: 1},
+  {q: "PC部で一番人気の活動は？", a: ["ゲーム", "プログラミング", "昼寝"], correct: 0},
+  {q: "卒業生の人数は？", a: ["9人", "8人", "7人"], correct: 2},
+  {q: "部室はどこ？", a: ["PC室", "金工室", "木工室"], correct: 2},
+  {q: "活動日は？", a: ["自由参加", "毎週水曜", "毎日"], correct: 1},
+  {q: "部員の必須アイテムは？", a: ["ノートPC", "ペン", "定規"], correct: 0},
+  {q: "PC部の顧問は？", a: ["消しカス", "たつや", "こはく"], correct: 1},
+  {q: "PC部の部長は？", a: ["原さん", "たかし", "ゆうり"], correct: 2},
+  {q: "原さんは？", a: ["神！", "紙！", "上！"], correct: 0},
+  {q: "最後に感謝を伝える言葉は？", a: ["ありがとうPC部！", "またね！", "頑張れ！"], correct: 0}
+];
+
+let current = 0;
+let score = 0;
+const container = document.getElementById("container");
+const status = document.getElementById("status");
+const startBtn = document.getElementById("startBtn");
+const endRoll = document.getElementById("endRoll");
+
+function showQuestion() {
+  const q = quiz[current];
+  container.innerHTML = `<p>${q.q}</p>`;
+  status.textContent = `${current+1}/10`;
+  q.a.forEach((choice, i) => {
+    const btn = document.createElement("button");
+    btn.textContent = choice;
+    btn.onclick = () => checkAnswer(i);
+    container.appendChild(btn);
+  });
+}
+
+function flashRed() {
+  document.body.style.backgroundColor = "red";
+  setTimeout(()=>{ document.body.style.backgroundColor = "#222"; }, 300);
+}
+
+function checkAnswer(i) {
+  if (i === quiz[current].correct) {
+    score++;
+    createFirework(window.innerWidth/2, window.innerHeight/2);
+  } else {
+    flashRed();
+  }
+  current++;
+  if (current < quiz.length) {
+    setTimeout(showQuestion, 500);
+  } else {
+    setTimeout(showResult, 1000);
+  }
+}
+
+function showResult() {
+  container.innerHTML = `<h2>クイズ終了！</h2><p>10問中${score}問正解！</p>`;
+  status.textContent = "";
+  setTimeout(startEndRoll, 1500);
+}
+
+// エンドロールスクロール
+function startEndRoll() {
+  endRoll.style.display = "block";
+  let pos = -endRoll.offsetHeight;
+  function scroll() {
+    pos += 1;
+    endRoll.style.bottom = pos + "px";
+    if(pos < window.innerHeight) requestAnimationFrame(scroll);
+  }
+  scroll();
+}
+
+startBtn.onclick = () => {
+  startBtn.style.display = "none";
+  current = 0;
+  score = 0;
+  showQuestion();
+};
+</script>
+</body>
+</html>
