@@ -41,6 +41,17 @@
     left: 0;
     z-index: 1;
   }
+  ul {
+    list-style-type: none;
+    padding: 10px;
+    margin: 10px auto;
+    display: inline-block;
+    background: #333;
+    border-radius: 15px; /* 角丸 */
+  }
+  ul li {
+    padding: 5px 10px;
+  }
 </style>
 </head>
 <body>
@@ -75,7 +86,8 @@ function createFirework(x, y) {
       vx: (Math.random()-0.5)*4,
       vy: (Math.random()-1.5)*4,
       alpha: 1,
-      color: `hsl(${Math.random()*360}, 100%, 50%)`
+      color: `hsl(${Math.random()*360}, 100%, 50%)`,
+      size: Math.random()*4 + 2
     });
   }
 }
@@ -84,12 +96,17 @@ function drawFireworks() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   for (let i = particles.length-1; i >=0; i--) {
     let p = particles[i];
-    ctx.fillStyle = `rgba(${p.color}, ${p.alpha})`;
+    ctx.fillStyle = p.color; // hslのまま
+    ctx.globalAlpha = p.alpha;
     ctx.beginPath();
-    ctx.arc(p.x, p.y, 3, 0, Math.PI*2);
+    ctx.arc(p.x, p.y, p.size, 0, Math.PI*2);
     ctx.fill();
+    ctx.globalAlpha = 1;
+
+    // 移動＋重力効果
     p.x += p.vx;
     p.y += p.vy;
+    p.vy += 0.05; // 下方向に少し加速
     p.alpha -= 0.02;
     if(p.alpha <= 0) particles.splice(i,1);
   }
@@ -119,13 +136,16 @@ const endRoll = document.getElementById("endRoll");
 
 function showQuestion() {
   const q = quiz[current];
-  container.innerHTML = `<p>${q.q}</p>`;
+  container.innerHTML = `<p>${q.q}</p><ul></ul>`;
+  const ul = container.querySelector("ul");
   status.textContent = `${current+1}/10`;
   q.a.forEach((choice, i) => {
+    const li = document.createElement("li");
     const btn = document.createElement("button");
     btn.textContent = choice;
     btn.onclick = () => checkAnswer(i);
-    container.appendChild(btn);
+    li.appendChild(btn);
+    ul.appendChild(li);
   });
 }
 
@@ -175,5 +195,5 @@ startBtn.onclick = () => {
 };
 </script>
 </body>
-
 </html>
+
