@@ -14,11 +14,15 @@
     transition: background-color 0.3s;
   }
   #container { padding-top: 50px; position: relative; z-index: 2;}
+  #container p {
+    font-size: 2.5em;  /* 問題文大きく */
+    margin-bottom: 30px;
+  }
   #status {
     position: absolute;
     top: 10px;
     right: 20px;
-    font-size: 1.2em;
+    font-size: 1.5em;
     z-index: 2;
   }
   #endRoll {
@@ -38,20 +42,20 @@
   }
   ul {
     list-style-type: none;
-    padding: 10px;
+    padding: 15px;
     margin: 10px auto;
     display: flex; /* 横並び */
     justify-content: center;
     background: #333;
-    border-radius: 15px; /* UL角丸 */
+    border-radius: 20px; /* UL角丸 */
   }
   ul li {
-    margin: 0 10px;
+    margin: 0 15px;
   }
   ul li button {
-    padding: 10px 20px;
-    font-size: 1.2em;
-    border-radius: 15px; /* ボタン角丸 */
+    padding: 25px 50px;  /* ボタン大きく */
+    font-size: 2em;      /* フォント大きく */
+    border-radius: 25px; /* ボタン角丸 */
     border: none;
     background-color: #555;
     color: white;
@@ -73,10 +77,9 @@
 <div id="endRoll">
   <p>PC部 第2期 卒業！</p>
   <p>入部した日々…</p>
-  <p>何か</p>
-  <p>なんか</p>
-  <p>ナンカ</p>
-  <p>nanka</p>
+  <p>思い出いっぱい！</p>
+  <p>みんなありがとう！</p>
+  <p>また会おう！</p>
 </div>
 
 <script>
@@ -87,24 +90,22 @@ canvas.height = window.innerHeight;
 
 let particles = [];
 
-// 花火作成
 function createFirework() {
   const x = Math.random() * canvas.width;
-  const y = Math.random() * canvas.height / 2; // 上半分で爆発
-  for (let i = 0; i < 80; i++) {
+  const y = Math.random() * canvas.height / 2;
+  for (let i = 0; i < 150; i++) {  // 粒数150
     particles.push({
       x: x,
       y: y,
-      vx: (Math.random()-0.5)*8,
-      vy: (Math.random()-0.5)*8,
+      vx: (Math.random()-0.5)*12,  // 速度大きめ
+      vy: (Math.random()-0.5)*12,
       alpha: 1,
       color: `hsl(${Math.random()*360}, 100%, 50%)`,
-      size: Math.random()*6 + 3
+      size: Math.random()*10 + 5     // 粒サイズ5〜15
     });
   }
 }
 
-// 花火描画
 function drawFireworks() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   for (let i = particles.length-1; i >=0; i--) {
@@ -117,15 +118,14 @@ function drawFireworks() {
     ctx.globalAlpha = 1;
     p.x += p.vx;
     p.y += p.vy;
-    p.vy += 0.05; // 重力
-    p.alpha -= 0.02;
+    p.vy += 0.05;  // 重力
+    p.alpha -= 0.015; // 粒の寿命長め
     if(p.alpha <= 0) particles.splice(i,1);
   }
   requestAnimationFrame(drawFireworks);
 }
 drawFireworks();
 
-// クイズデータ
 const quiz = [
   {q: "PC部の設立年は？", a: ["2021", "2022", "2023"], correct: 1},
   {q: "PC部で一番人気の活動は？", a: ["ゲーム", "プログラミング", "昼寝"], correct: 0},
@@ -146,7 +146,6 @@ const status = document.getElementById("status");
 const startBtn = document.getElementById("startBtn");
 const endRoll = document.getElementById("endRoll");
 
-// 質問表示
 function showQuestion() {
   const q = quiz[current];
   container.innerHTML = `<p>${q.q}</p><ul></ul>`;
@@ -162,13 +161,11 @@ function showQuestion() {
   });
 }
 
-// 不正解時背景赤
 function flashRed() {
   document.body.style.backgroundColor = "red";
   setTimeout(()=>{ document.body.style.backgroundColor = "#222"; }, 300);
 }
 
-// 回答チェック
 function checkAnswer(i) {
   if (i === quiz[current].correct) {
     score++;
@@ -184,14 +181,12 @@ function checkAnswer(i) {
   }
 }
 
-// 結果表示
 function showResult() {
   container.innerHTML = `<h2>クイズ終了！</h2><p>10問中${score}問正解！</p>`;
   status.textContent = "";
   setTimeout(startEndRoll, 1500);
 }
 
-// エンドロール
 function startEndRoll() {
   endRoll.style.display = "block";
   let pos = -endRoll.offsetHeight;
@@ -203,7 +198,6 @@ function startEndRoll() {
   scroll();
 }
 
-// スタートボタン
 startBtn.onclick = () => {
   startBtn.style.display = "none";
   current = 0;
@@ -213,5 +207,7 @@ startBtn.onclick = () => {
 </script>
 </body>
 </html>
+
+
 
 
